@@ -14,7 +14,7 @@ param (
 if ($Latitude -eq 0 -and $Longitude -eq 0) { Write-Warning 'It appears you didn''t supply a latitude or longitude. Defaulting to 0, 0.' }
 
 $CURRENT_DATE = Get-Date
-$URL_API = "https://api.sunrise-sunset.org/json?lat=$Latitude&lng=$Longitude&date=$($CURRENT_DATE.ToString('yyyy-MM-dd'))&formatted=0"
+$URL_API = "https://api.sunrise-sunset.org/json?lat=$Latitude&lng=$Longitude&formatted=0"
 $REG_PATH_PERSONALIZATION = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize'
 $REG_PATH_SCRIPT = 'HKCU:\Script\BinaryInk\AutoThemeMode'
 
@@ -37,7 +37,15 @@ else {
 }
 
 # Determine whether data needs to be added to registry (or refreshed)
-if ($LastRun.ToString("yyyyMMdd") -ne $CURRENT_DATE.ToString("yyyyMMdd") -or $null -eq $LastRun) {
+$UpdateData = $false
+if ($null -eq $LastRun) {
+    $UpdateData = $true
+}
+elseif ($LastRun.ToString("yyyyMMdd") -ne $CURRENT_DATE.ToString("yyyyMMdd")) {
+    $UpdateData = $true
+}
+
+if ($UpdateData) {
     Write-Debug 'Retrieving New Data'
     # Get new Sunrise/Sunset
     $Response = Invoke-WebRequest -Uri $URL_API
