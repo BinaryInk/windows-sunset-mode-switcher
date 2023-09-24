@@ -1,4 +1,4 @@
-# Ver 2
+# Ver 2.1
 
 param (
     [Parameter(Position=0)]
@@ -12,7 +12,6 @@ param (
 
 $TASK_PATH = "\windows-sunset-mode-switcher\"
 $TASK_NAME = "windows-sunset-mode-switcher"
-$LOGON_TASK_NAME = "windows-sunset-mode-switcher-logon"
 $CURRENT_DATE = Get-Date
 
 function Get-SunsetSunriseData() { # [datetime], [datetime]
@@ -56,31 +55,27 @@ function Set-WindowsModeLight([Parameter(Position=0)][bool]$On) {
 
 ### Stage 1: Windows Mode Change ###############################################
 $Sunrise, $Sunset = Get-SunsetSunriseData
-# Fix: Adding a few seconds to the Sunset and Sunrise ensures that the next time it runs, it will change as expected.
-$Sunrise = $Sunrise.AddSeconds(3);
-$Sunset = $Sunset.AddSeconds(3);
-Write-Debug "Sunrise: $($Sunrise.ToString())`nSunset: $($Sunset.ToString())"
+# Fix: Adding a minute to the Sunset and Sunrise ensures that the next time it runs, it will change as expected.
+### TODO: May or may not address this since it's not "true" sunrise/sunset (on the other hand, it's a theme scheduler and it's only <=1 minute).
+$Sunrise = $Sunrise.AddSeconds(5);
+$Sunset = $Sunset.AddSeconds(5);
 $SunIsInSky = $CURRENT_DATE -gt $Sunrise -and $CURRENT_DATE -lt $Sunset ? $true : $false
-Write-Debug "Sun in Sky: $SunIsInSky"
+
 Set-WindowsModeLight $SunIsInSky
-$NextSunEvent = $SunIsInSky ? $Sunset : $Sunrise
-Write-Debug "Next Sun Event: $NextSunEvent"
+
+Write-Debug "Sunrise: $($Sunrise.ToString())`nSunset: $($Sunset.ToString())`nSun in Sky: $SunIsInSky"
 
 ### Stage 2: Task Scheduler ####################################################
-# Logon Task Handling ("First Run")
-$LogonTask = Get-ScheduledTask $LOGON_TASK_NAME
-
+$Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -RunLevel "Highest"
 $Actions = New-ScheduledTaskAction -Execute 'pwsh.exe' -Argument "-NoProfile -WindowStyle Hidden -File $PSScriptRoot -Latitude $Latitude -Longitude $Longitude"
 $SunriseTrigger = New-ScheduledTaskTrigger -Daily -At $($Sunrise.ToString("HH:mm:ss"))
 $SunsetTrigger = New-ScheduledTaskTrigger -Daily -At $($Sunset.ToString("HH:mm:ss"))
+$LogonTrigger = New-ScheduledTaskTrigger -AtLogon
 
-if ($null -eq $LogonTask) {
-    Write-Debug 'Creating logon task'
-    $LogonTrigger = New-ScheduledTaskTrigger -AtLogon
-    Register-ScheduledTask $LOGON_TASK_NAME -TaskPath $TASK_PATH -Action $Actions -Trigger $LogonTrigger
-}
-
-Unregister-ScheduledTask "$TASK_NAME-sunrise" -Confirm:$false | Out-Null
-Unregister-ScheduledTask "$TASK_NAME-sunset" -Confirm:$false | Out-Null
-Register-ScheduledTask "$TASK_NAME-sunrise" -TaskPath $TASK_PATH -Action $Actions -Trigger $SunriseTrigger | Out-Null
-Register-ScheduledTask "$TASK_NAME-sunset" -TaskPath $TASK_PATH -Action $Actions -Trigger $SunsetTrigger | Out-Null
+Unregister-ScheduledTask $TASK_NAME -Confirm:$false -ErrorAction 'SilentlyContinue' | Out-Null
+Register-ScheduledTask -TaskName $TASK_NAME `
+                       -TaskPath $TASK_PATH `
+                       -Action $Actions `
+                       -Trigger @($SunriseTrigger, $SunsetTrigger, $LogonTrigger) `
+                       -Principal $Principal | 
+        Out-Null

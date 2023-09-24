@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 2.1 - 2023-09-24
+
+- Added SYSTEM Principal -- should make the action silent.
+- Converged all the triggers to a single task (initially, I was thinking about passing values to the script in Actions but decided against)
+- Cleaned up unused code, debug messages.
+
 ## Version 2 - 2023-09-24
 
 - Name change to reflect what is actually being managed by the script (Theme **mode**, not the theme itself)
