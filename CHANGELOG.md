@@ -2,6 +2,7 @@
 
 ## Version 2.1 - 2023-09-24
 
+- Changed delay from 3 seconds to 1 minute; Task Scheduler does not count seconds when creating the trigger.
 - Added SYSTEM Principal -- should make the action silent.
 - Converged all the triggers to a single task (initially, I was thinking about passing values to the script in Actions but decided against)
 - Cleaned up unused code, debug messages.
