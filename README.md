@@ -1,26 +1,24 @@
 # Windows Sunset Mode Switcher
 
 - Requires: Windows 11, PowerShell 7+ (pwsh.exe), active internet connection
-    - Not tested, but this should work for Windows 10 as well.
-    - pwsh.exe is currently hardcoded in the task scheduler settings, so modern powershell is a must.
-    - This currently requires an internet connection and queries the public sunrise-sunset.org API. No API key required.
+  - Not tested, but this should work for Windows 10 as well.
+  - pwsh.exe is currently hardcoded in the task scheduler settings, so modern powershell is a must.
+  - This currently requires an internet connection and queries the public sunrise-sunset.org API. No API key required.
 
 ## About
 
-A simple script that changes the Windows Theme **Mode** on sunset/sunrise to dark/light respectively. It does not change other personalization settings.
+A simple script that changes the Windows Theme **Mode** on sunset/sunrise to dark/light respectively.
 
 ## Installation & Use
 
 1. Move the `ps1` script where you want it to reside.
 2. With an elevated terminal, run the script and pass your latitude and longitude: `.\windows-sunset-mode-switcher.ps1 -Lat 47.673 -Long -122.121`
 
-The script will create a logon task and a primary task. The logon task is to update the instructions if they are old (for instance: a laptop that has been off for over a day). That said, both the sunset and sunrise tasks are set to "Daily" instead of "Once" to also attempt correction.
-
-### Windows File Explorer Settings
+### Recommended: Windows File Explorer Settings
 
 This change is **HIGHLY RECOMMENDED**. Please read.
 
-In order to enforce the change of mode to the taskbar and other desktop elements, this script restarts the _explorer.exe_ process that manages the desktop. Without doing so, the change to the theme mode will not apply to the task bar and some other desktop-related elements. I plan to look into how to cause this change without killing processes, but until then...
+In order to enforce the change of mode to the taskbar and other desktop elements, this script restarts the *explorer.exe* process that manages the desktop. Without doing so, the change to the theme mode will not apply to the task bar and some other desktop-related elements. I plan to look into how to cause this change without killing processes, but until then...
 
 If the below setting is _not_ enabled, it will close all open file explorer windows as well, which is obviously undesired. (I would recommend this change regardless of whether you choose to use this script: if the desktop crashes, your open File Explorer windows likely won't).
 
