@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 2.1 - 2023-09-24
+
+- Changed delay from 3 seconds to 1 minute; Task Scheduler does not count seconds when creating the trigger.
+
 ## Version 2 - 2023-09-24
 
 - Name change to reflect what is actually being managed by the script (Theme **mode**, not the theme itself)

@@ -1,4 +1,4 @@
-# Ver 2
+# Ver 2.1
 
 param (
     [Parameter(Position=0)]
@@ -56,9 +56,10 @@ function Set-WindowsModeLight([Parameter(Position=0)][bool]$On) {
 
 ### Stage 1: Windows Mode Change ###############################################
 $Sunrise, $Sunset = Get-SunsetSunriseData
-# Fix: Adding a few seconds to the Sunset and Sunrise ensures that the next time it runs, it will change as expected.
-$Sunrise = $Sunrise.AddSeconds(3);
-$Sunset = $Sunset.AddSeconds(3);
+# Fix: Adding a minute to the Sunset and Sunrise ensures that the next time it runs, it will change as expected.
+### TODO: May or may not address this since it's not "true" sunrise/sunset (on the other hand, it's a theme scheduler and it's only <=1 minute).
+$Sunrise = $Sunrise.AddMinutes(1);
+$Sunset = $Sunset.AddMinutes(1);
 Write-Debug "Sunrise: $($Sunrise.ToString())`nSunset: $($Sunset.ToString())"
 $SunIsInSky = $CURRENT_DATE -gt $Sunrise -and $CURRENT_DATE -lt $Sunset ? $true : $false
 Write-Debug "Sun in Sky: $SunIsInSky"
@@ -77,7 +78,7 @@ $SunsetTrigger = New-ScheduledTaskTrigger -Daily -At $($Sunset.ToString("HH:mm:s
 if ($null -eq $LogonTask) {
     Write-Debug 'Creating logon task'
     $LogonTrigger = New-ScheduledTaskTrigger -AtLogon
-    Register-ScheduledTask $LOGON_TASK_NAME -TaskPath $TASK_PATH -Action $Actions -Trigger $LogonTrigger
+    Register-ScheduledTask $LOGON_TASK_NAME -TaskPath $TASK_PATH -Action $Actions -Trigger $LogonTrigger | Out-Null
 }
 
 Unregister-ScheduledTask "$TASK_NAME-sunrise" -Confirm:$false | Out-Null

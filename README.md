@@ -20,7 +20,7 @@ This change is **HIGHLY RECOMMENDED**. Please read.
 
 In order to enforce the change of mode to the taskbar and other desktop elements, this script restarts the *explorer.exe* process that manages the desktop. Without doing so, the change to the theme mode will not apply to the task bar and some other desktop-related elements. I plan to look into how to cause this change without killing processes, but until then...
 
-If the below setting is _not_ enabled, it will close all open file explorer windows as well, which is obviously undesired. (I would recommend this change regardless of whether you choose to use this script: if the desktop crashes, your open File Explorer windows likely won't).
+If the below setting is *not* enabled, it will close all open file explorer windows as well, which is obviously undesired. (I would recommend this change regardless of whether you choose to use this script: if the desktop crashes, your open File Explorer windows likely won't).
 
 1. Open a File Explorer window (Win+E) and click on the elipses in the top-right, click Options
 2. Under the View tab, enable the 'Launch folder windows in a separate process' option and click OK to apply.
