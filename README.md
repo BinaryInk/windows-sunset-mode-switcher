@@ -11,37 +11,31 @@ A simple script that changes the Windows Theme **Mode** on sunset/sunrise to dar
 
 ## Installation & Use
 
-1. Move the `ps1` script where you want it to reside.
+1. Move the `ps1` script where you want it to reside. (Recommendation: `%APPDATA%\windows-theme-mode-switcher\`)
 2. With an elevated terminal, run the script and pass your latitude and longitude: `.\windows-sunset-mode-switcher.ps1 -Lat 47.673 -Long -122.121`
 
 ### Recommended: Windows File Explorer Settings
 
 This change is **HIGHLY RECOMMENDED**. Please read.
 
-In order to enforce the change of mode to the taskbar and other desktop elements, this script restarts the *explorer.exe* process that manages the desktop. Without doing so, the change to the theme mode will not apply to the task bar and some other desktop-related elements. I plan to look into how to cause this change without killing processes, but until then...
+In order to enforce the change of mode to the taskbar and other desktop elements, this script restarts the *explorer.exe* process that manages the desktop. Without doing so, the change to the theme mode will not apply to the taskbar and some other desktop-related elements. I plan to look into how to cause this change without killing processes, but until then...
 
 If the below setting is *not* enabled, it will close all open file explorer windows as well, which is obviously undesired. (I would recommend this change regardless of whether you choose to use this script: if the desktop crashes, your open File Explorer windows likely won't).
 
 1. Open a File Explorer window (Win+E) and click on the elipses in the top-right, click Options
 2. Under the View tab, enable the 'Launch folder windows in a separate process' option and click OK to apply.
 
-Note that after the change, you will need to restart the explorer.exe process. You can do so in PowerShell with the following command: `ps explorer | kill`. This will also close any open file explorer windows.
+Note: that after the change, you will need to restart the explorer.exe process. You can do so in PowerShell with the following command: `ps explorer | kill`. This will also close any open file explorer windows.
+
+Note 2: Any open file explorer windows will also appear incorrectly after a theme mode change. New file explorer windows will appear correctly.
 
 ## Most Recent Update
 
-## Version 3 - 2023-10-02
+### Version 3.1 - 2023-10-08
 
-Version 2 never really worked as expected. I both over- and under-thought the problem.
-
-- Parameter `-SetMode` added to set the theme mode
-  - Bullet proof, more or less. Instead of messing with delays and depending on the script to fire at a time greater than another time, the switch makes it explicit. Running without the switch functions as it previously did and is used for the logon task.
-  - Requires separate task scheduler tasks.
-- Reverted back to using the current user account for the security principal.
-  - Running as SYSTEM, the script as-written wasn't resetting the explorer process.
-  - This means that the console window will flash when executed.
-  - I'm eventually going to make a decision on how to handle refreshing the GUI. This may affect what I use for security principal.
-- Added `-ExecutionPolicy Bypass` argument to task.
-- Various syntax and style changes
+- Added `-Uninstall` switch and capability.
+- Added `-PrincipalUserId` to allow the task to be created under a different account.
+- Created parameter sets in anticipation of future options.
 
 ## Roadmap
 
@@ -51,3 +45,6 @@ Version 2 never really worked as expected. I both over- and under-thought the pr
   - Need to find how to change the mode w/o killing explorer.exe.
 - **Misc Improvements**
   - Reduce API calls.
+- **Fire on Resume/Run Next When Missed**
+  - There's a way to do the latter by using XML to create scheduled tasks.
+  - A fourth task for running on resume may not be a bad idea regardless.
