@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 3.1 - 2023-10-08
+
+- Added `-Uninstall` switch and capability.
+- Added `-PrincipalUserId` to allow the task to be created under a different account.
+- Created parameter sets in anticipation of future options.
+
 ## Version 3 - 2023-10-02
 
 Version 2 never really worked as expected. I both over- and under-thought the problem.

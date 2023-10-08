@@ -1,30 +1,63 @@
 # Ver 3.0
 
 param (
-    [Parameter(Position=0)]
+    [Parameter(
+        Position=0, 
+        ParameterSetName = 'Standard'
+    )]
     [double]
     $Latitude = 0,
 
-    [Parameter(Position=1)]
+    [Parameter(
+        Position=1,
+        ParameterSetName = 'Standard'
+    )]
     [double]
     $Longitude = 0,
 
-    [Parameter()]
+    [Parameter(
+        Position=2,
+        ParameterSetName = 'Standard'
+    )]
     [string]
     [ValidateSet("Light", "Dark")]
-    $SetMode
+    $SetMode,
+
+    [Parameter(
+        ParameterSetName = 'Standard'
+    )]
+    [string]
+    $PrincipalUserId = $env:USERNAME,
+
+    [Parameter(
+        ParameterSetName = 'Uninstall',
+        Mandatory = $true
+    )]
+    [switch]
+    [Alias("Remove")]
+    $Uninstall
 )
 
 $TASK_PATH = "\windows-sunset-mode-switcher\"
 $TASK_NAME = "windows-sunset-mode-switcher"
 $TASK_NAME_SUNRISE = $TASK_NAME + "-sunrise"
 $TASK_NAME_SUNSET = $TASK_NAME + "-sunset"
+if ($Uninstall) {
+    foreach ($taskName in @($TASK_NAME, $TASK_NAME_SUNRISE, $TASK_NAME_SUNSET)) {
+        Unregister-ScheduledTask -TaskName $taskName -TaskPath $TASK_PATH | Out-Null
+    }
+
+    return
+}
+$TASK_PRINCIPAL = New-ScheduledTaskPrincipal -UserId $PrincipalUserId -RunLevel "Highest"
 $CURRENT_DATE = Get-Date
 
 # Used to determine the next Sunrise and Sunset for Task Scheduler triggers.
 function Get-SunriseSunset { # [datetime], [datetime]
     param()
-    if ($Latitude -eq 0 -and $Longitude -eq 0) { Write-Warning 'It appears you didn''t supply a latitude or longitude. Defaulting to 0, 0.' }
+    if ($Latitude -eq 0 -and $Longitude -eq 0) { 
+        Write-Warning 'It appears you didn''t supply a latitude or longitude. Defaulting to 0, 0.' 
+    }
 
     $URL_API = "https://api.sunrise-sunset.org/json?lat=$Latitude&lng=$Longitude&formatted=0"
     $URL_TODAY = "$URL_API&date=$($CURRENT_DATE.ToString("yyyy-MM-dd"))"
@@ -109,7 +142,7 @@ $Tasks = @(
     @{
         TaskName = $TASK_NAME_SUNRISE
         TaskPath = $TASK_PATH
-        Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -RunLevel "Highest"
+        Principal = $TASK_PRINCIPAL
         Action = New-ScheduledTaskAction -Execute $Execute `
                                         -Argument "$Argument -SetMode Light"
         Trigger = New-ScheduledTaskTrigger -Daily -At $($Sunrise.ToString("HH:mm:ss"))
@@ -117,7 +150,7 @@ $Tasks = @(
     @{
         TaskName = $TASK_NAME_SUNSET
         TaskPath = $TASK_PATH
-        Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -RunLevel "Highest"
+        Principal = $TASK_PRINCIPAL
         Action = New-ScheduledTaskAction -Execute $Execute `
                                         -Argument "$Argument -SetMode Dark"
         Trigger = New-ScheduledTaskTrigger -Daily -At $($Sunset.ToString("HH:mm:ss"))
@@ -125,7 +158,7 @@ $Tasks = @(
     @{
         TaskName = $TASK_NAME
         TaskPath = $TASK_PATH
-        Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -RunLevel "Highest"
+        Principal = $TASK_PRINCIPAL
         Action = New-ScheduledTaskAction -Execute $Execute `
                                         -Argument $Argument
         Trigger = New-ScheduledTaskTrigger -AtLogon
